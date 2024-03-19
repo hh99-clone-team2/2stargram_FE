@@ -4,30 +4,30 @@ module.exports = {
     es2021: true,
   },
   extends: [
-    'eslint:recommended',
-    'plugin:react/recommended',
-    'plugin:jsx-a11y/recommended',
-    'plugin:react-hooks/recommended',
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:jsx-a11y/recommended",
+    "plugin:react-hooks/recommended",
   ],
   overrides: [
     {
       env: {
         node: true,
       },
-      files: ['.eslintrc.{js,cjs}'],
+      files: [".eslintrc.{js,cjs}"],
       parserOptions: {
-        sourceType: 'script',
+        sourceType: "script",
       },
     },
   ],
   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
+    ecmaVersion: "latest",
+    sourceType: "module",
   },
-  plugins: ['react'],
+  plugins: ["react"],
   rules: {
-    'no-unused-vars': 'off', // 사용되지 않는 변수 경고를 끔
-    'react/prop-types': 0,
-    'react/forbid-prop-types': 0,
+    "no-unused-vars": "off", // 사용되지 않는 변수 경고를 끔
+    "react/prop-types": 0,
+    "react/forbid-prop-types": 0,
   },
 };
