@@ -1,12 +1,9 @@
-import React from "react";
 import styled from "styled-components";
 
 const Container = styled.div`
   background-color: #b98686;
 
-  width: 100%; 
-
-
+  width: 100%;
 `;
 
 type PropsType = {
