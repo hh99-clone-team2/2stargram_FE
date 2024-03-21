@@ -5,6 +5,7 @@ import { FcLike } from "react-icons/fc";
 import { IoChatbubbleOutline } from "react-icons/io5";
 import { IoPaperPlaneOutline } from "react-icons/io5";
 import { FaRegBookmark } from "react-icons/fa";
+import HorizonLine from "../Layout/HorizontalLine";
 
 function Post() {
   return (
@@ -44,7 +45,7 @@ function Post() {
         <p className="commentCount">댓글 700개 모두 보기</p>
       </Contents>
 
-      <hr />
+      <HorizonLine />
     </PostContainer>
   );
 }
@@ -54,7 +55,7 @@ export default Post;
 const PostContainer = styled.div`
   width: 100%;
   max-width: 468px;
-  background-color: #fafafa;
+  background-color: #fff;
   color: black;
   margin: 0 auto;
 `;
@@ -122,6 +123,7 @@ const IconContainer = styled.div`
 
 const Contents = styled.div`
   margin-left: 10px;
+
   .LikeCount {
     font-weight: bold;
     margin-top: 8px;
@@ -137,18 +139,19 @@ const Contents = styled.div`
     font-weight: bolder;
     margin: 0%;
     font-size: 14px;
+    margin-top: 5px;
   }
 
   .SummaryContent {
     font-size: 14px;
-    margin-top: 0%;
+    margin-top: 5px;
     margin-bottom: 0%;
     margin-left: 5px;
   }
 
   .commentCount {
     font-size: 14px;
-    margin: 0%;
+    margin-top: 5px;
     color: grey;
   }
 `;
