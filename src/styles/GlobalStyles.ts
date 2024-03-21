@@ -1,12 +1,15 @@
 import { createGlobalStyle } from "styled-components";
+import reset from "styled-reset";
+
 const GlobalStyles = createGlobalStyle`
+${reset}
 body {
-    background-color: #fafafa;
-    margin: 0 auto; 
-    box-sizing: border-box; /* padding 값을 포함하여 요소 크기 계산 */
+  background-color: #fff;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
-  
-
+button{
+  cursor: pointer;
+}
 `;
-
 export default GlobalStyles;
