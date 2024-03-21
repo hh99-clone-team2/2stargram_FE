@@ -1,4 +1,4 @@
-import Feed from "../components/mainPage/Feed";
+import Feed from "../components/MainPage/Feed";
 
 function Main() {
   return (
