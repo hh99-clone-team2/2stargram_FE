@@ -1,11 +1,8 @@
-import Feed from "../components/MainPage/Feed";
+import React from "react";
+import MainComponents from "../components/MainComponents";
 
 function Main() {
-  return (
-    <>
-      <Feed />
-    </>
-  );
+  return <MainComponents>페이지에서 내려주는 props children</MainComponents>;
 }
 
 export default Main;
