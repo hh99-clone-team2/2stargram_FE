@@ -1,24 +1,22 @@
 import axios from "axios";
-import { getLocalStorage } from "../utils/cookieUtils";
+import { setLocalStorage, getLocalStorage } from "../utils/cookieUtils";
 
-// Axios를 사용하여 서버와 통신하는 인스턴스를 생성
-// 토큰이 필요한 경우와 필요하지 않은 경우를 각각 다르게 처리
-
-// 토큰이 필요 없는 경우
+// API 요청을 보낼 기본 인스턴스 생성 env 안넘어오는건가 해서 그냥 url 적은
 export const instance = axios.create({
-  baseURL: import.meta.env.VITE_REACT_APP_SERVER_URL,
+  baseURL: "http://43.203.227.2/api",
 });
 
-// 토큰이 필요한 경우
+// 인증이 필요한 API 요청을 보낼 인스턴스 생성
 export const authInstance = axios.create({
-  baseURL: import.meta.env.VITE_REACT_APP_SERVER_URL,
+  baseURL: "http://43.203.227.2/api",
+ 
 });
-
-// getLocalStorage() 함수를 사용하여 로컬 스토리지에서 토큰을 가져와서 헤더에 추가
-// 따라서 모든 요청에 대해 토큰을 수동으로 추가하는 대신에 인터셉터를 사용하여 자동으로 처리
+// 토큰을 요청 헤더에 추가하는 인터셉터 설정
 authInstance.interceptors.request.use(
   (config) => {
+    // 토큰 가져오기
     const token = getLocalStorage();
+    // 토큰이 존재하는 경우 요청 헤더에 추가
     if (token) {
       config.headers.Authorization = token;
     }
@@ -26,5 +24,36 @@ authInstance.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
+
+// 로그인 요청에 대한 처리
+export const loginUser = async (loginInfo: any) => {
+  try {
+    const response = await instance.post("/user/login", loginInfo);
+    // 로그인 요청에 성공한 경우 서버로부터 받은 토큰을 로컬 스토리지에 저장
+    if (response.status === 200) {
+      const token = response.headers.authorization;
+      setLocalStorage(token);
+    }
+    return response;
+  } catch (error: any) {
+    console.log("로그인 요청 실패:", error.response); // 에러 로그 출력
+    throw error;
+  }
+};
+
+// 회원가입 요청에 대한 처리
+export const signupUser = async (signupInfo: any) => {
+  try {
+    const response = await instance.post("/user/signup", signupInfo);
+    // 회원가입 요청에 성공한 경우 서버로부터 받은 토큰을 로컬 스토리지에 저장
+    // if (response.status === 201) {
+    //   const token = response.headers.authorization;
+    //   setLocalStorage(token);
+    // }
+    return response;
+  } catch (error: any) {
+    throw error;
+  }
+};

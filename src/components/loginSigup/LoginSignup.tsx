@@ -1,84 +1,117 @@
 import React, { ChangeEvent, FormEvent, useState } from "react";
-
-import styled from "styled-components";
 import logo from "../../assets/logo.png";
 import {
-  LoginInfo,
-  SignupInfo,
-  loginUser,
-  signupUser,
-} from "../../axios/login-api";
-import { setCookie, setLocalStorage } from "../../utils/cookieUtils";
+  LoginWrapper,
+  LoginFormContainer,
+  SignupFormContainer,
+  LoginForm,
+  LinkForm,
+  Input,
+  Button,
+  Link,
+  Img,
+  And,
+} from "./LoginSignup.module";
 import { useMutation } from "@tanstack/react-query";
-import { AxiosResponse } from "axios";
+import { loginUser, signupUser } from "../../axios/api";
+import { setCookie, setLocalStorage } from "../../utils/cookieUtils";
+import { useNavigate } from "react-router-dom";
 
 const LoginSignup = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
+  const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [username, setUsername] = useState("");
 
+  const navigate = useNavigate();
   const handleToggle = () => {
     setIsLogin(!isLogin);
   };
 
-  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
+  const handleusernameChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const username = e.target.value;
+    setUsername(username);
+  };
+  const handleLoginIdChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const loginId = e.target.value;
+    setLoginId(loginId);
   };
 
   const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value);
+    const password = e.target.value;
+    setPassword(password);
   };
 
-  const handleUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setUsername(e.target.value);
+  const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const name = e.target.value;
+    setName(name);
   };
 
-  const loginMutation = useMutation({
-    mutationFn: loginUser,
-    onSuccess: (data) => {
-      const { refreshToken, accessToken, username } = data.data;
-     
-        setLocalStorage(accessToken);
-        setCookie("refreshToken", refreshToken);
-        localStorage.setItem("username", username);
-        alert(`${username}님 로그인 성공하였습니다. 메인페이지로 이동합니다!`);
-     
-    },
-    onError: (error) => {
-      console.log("로그인 실패 : ", error);
-      alert("로그인에 실패하였습니다!");
-    },
-  });
-  
+  const newUserInfo = {
+    loginId,
+    password,
+    name,
+    username,
+  };
 
-  
+  const userInfo = {
+    loginId,
+    password,
+  };
 
   // 회원가입 통신
   const signupMutation = useMutation({
     mutationFn: signupUser,
-    onSuccess: (data) => {
-      if (data.status === 200) {
-        alert("회원가입에 성공했습니다. 로그인을 한 뒤 게임을 즐기세요!");
+    onSuccess: (data: any) => {
+      console.log(data);
+      if (data.status === 201) {
+        alert("회원가입에 성공했습니다.");
         setIsLogin(true);
       }
     },
+    onError: (error: any) => {
+      console.error("회원가입 실패 : ", error.response);
+
+      alert("회원가입에 실패했습니다. 다시 시도해주세요.");
+    },
+  });
+  // 로그인 통신  
+  const loginMutation = useMutation({
+    mutationFn: loginUser,
+    onSuccess: (data: any) => {
+      const refreshToken = data.data.refreshToken;
+      const accessToken = data.headers.authorization;
+      if (data.status === 200) {
+        console.log("로그인 응답 데이터:", data.data);
+        setLocalStorage(accessToken);
+        setCookie("refreshToken", refreshToken);
+        localStorage.setItem("username", data.data.username);
+        // setLocalStorage(data.data.username);
+        alert(
+          `${data.data.username}님 로그인 성공하였습니다. 메인페이지로 이동합니다!`,
+        );1
+        navigate("/main");
+      }
+    },
     onError: (error) => {
-      console.error("회원가입 실패 : ", error);
+      console.log("로그인 실패 : ", error); 
+      alert("로그인에 실패하였습니다!");
     },
   });
 
-  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = async (e: any) => {
     e.preventDefault();
 
     if (isLogin) {
-        // 로그인 처리
-        loginMutation.mutate({ loginId: email, password });
-      } else {
-        // 회원가입 처리
-        signupMutation.mutate({ username, email, password });
-      }
-    };
+      // 로그인 처리
+      loginMutation.mutate(userInfo);
+    } else {
+      // 회원가입 처리
+      signupMutation.mutate(newUserInfo);
+      console.log("띄울게여 ", newUserInfo);
+    }
+  };
 
   return (
     <LoginWrapper>
@@ -86,35 +119,22 @@ const LoginSignup = () => {
         <LoginForm onSubmit={handleFormSubmit}>
           <Img src={logo} alt="로고 이미지" />
           <Input
-            type="email"
-            name="email"
-            placeholder="이메일 주소"
-            value={email}
-            onChange={handleEmailChange}
+            type="text"
+            name="loginId"
+            placeholder="이메일 또는 휴대폰 번호"
+            value={loginId}
+            onChange={handleLoginIdChange}
+            required
           />
-          {isLogin ? (
-            <>
-              <Input
-                type="password"
-                name="password"
-                placeholder="비밀번호"
-                value={password}
-                onChange={handlePasswordChange}
-              />
-              <Button type="submit">로그인</Button>
-            </>
-          ) : (
-            <>
-              <Input
-                type="text"
-                name="username"
-                placeholder="사용자 이름"
-                value={username}
-                onChange={handleUsernameChange}
-              />
-              <Button type="submit">가입</Button>
-            </>
-          )}
+          <Input
+            type="password"
+            name="password"
+            placeholder="비밀번호"
+            value={password}
+            onChange={handlePasswordChange}
+            required
+          />
+          <Button type="submit">로그인</Button>
           <And>또는</And>
           <Link href="#">비밀번호를 잊으셨나요?</Link>
         </LoginForm>
@@ -132,19 +152,30 @@ const LoginSignup = () => {
         <LoginForm onSubmit={handleFormSubmit}>
           <Img src={logo} alt="로고 이미지" />
           <div>친구들의 사진과 동영상을 보려면 가입하세요</div>
+
           <Input
-            type="email"
-            name="email"
-            placeholder="이메일 주소"
-            value={email}
-            onChange={handleEmailChange}
+            type="text"
+            name="loginId"
+            placeholder="이메일 또는 휴대폰 번호"
+            value={loginId}
+            onChange={handleLoginIdChange}
+            required
           />
           <Input
             type="text"
             name="username"
-            placeholder="사용자 이름"
+            placeholder="성명"
             value={username}
-            onChange={handleUsernameChange}
+            onChange={handleusernameChange}
+            required
+          />
+          <Input
+            type="text"
+            name="name"
+            placeholder="사용자 이름"
+            value={name}
+            onChange={handleNameChange}
+            required
           />
           <Input
             type="password"
@@ -152,6 +183,7 @@ const LoginSignup = () => {
             placeholder="비밀번호"
             value={password}
             onChange={handlePasswordChange}
+            required
           />
           <Button type="submit">가입</Button>
         </LoginForm>
@@ -169,80 +201,3 @@ const LoginSignup = () => {
 };
 
 export default LoginSignup;
-
-const LoginWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background-color: #fafafa;
-  gap: 10px;
-`;
-
-const LoginFormContainer = styled.div<{ show: boolean }>`
-  display: ${(props) => (props.show ? "flex" : "none")};
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-`;
-
-const SignupFormContainer = styled.div<{ show: boolean }>`
-  display: ${(props) => (props.show ? "flex" : "none")};
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-`;
-
-const LoginForm = styled.form`
-  width: 300px;
-  background: #fff;
-  padding: 60px;
-  border: 1px solid #dbdbdb;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-
-const LinkForm = styled.div`
-  display: flex;
-  flex-direction: row;
-  background: #fff;
-  padding: 20px 0px;
-  border: 1px solid #dbdbdb;
-  width: 420px;
-  justify-content: center;
-`;
-
-const Input = styled.input`
-  margin-bottom: 10px;
-  padding: 10px;
-  background: #fafafa;
-  border: 1px solid #dbdbdb;
-  border-radius: 3px;
-  width: 100%;
-`;
-
-const Button = styled.button`
-  padding: 10px;
-  background: #43b4ff;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  width: 107%;
-`;
-
-const And = styled.div`
-  margin: 24px 0px 0px;
-`;
-
-const Img = styled.img`
-  width: 200px;
-  margin-bottom: 50px;
-`;
-
-const Link = styled.a`
-  margin-top: 40px;
-  font-size: 15px;
-`;
