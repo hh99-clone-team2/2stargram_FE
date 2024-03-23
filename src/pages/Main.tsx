@@ -1,3 +1,4 @@
+import { requestSignUp } from "../components/APIS/axios";
 import Feed from "../components/MainPage/Feed";
 
 function Main() {

@@ -5,6 +5,7 @@ import { IoMdGrid } from "react-icons/io";
 import { FaRegBookmark, FaUserCog } from "react-icons/fa";
 import { BiUserPin } from "react-icons/bi";
 import styled from "styled-components";
+import { getPosts, loginSignUp, requestSignUp } from "../APIS/axios";
 
 function UsersComponent() {
   const [userPageCategory, setUserPageCategory] = useState("posts");
@@ -27,6 +28,9 @@ function UsersComponent() {
           <li>
             <FaUserCog />
           </li>
+          <button onClick={loginSignUp}>로그인</button>
+          <button onClick={requestSignUp}>회원가입</button>
+          <button onClick={getPosts}>불러오기</button>
         </Header>
       </HeaderContainer>
       <section>
@@ -70,21 +74,21 @@ function UsersComponent() {
       <PostTypeFlex>
         <PostTypeButton
           value="posts"
-          userPageCategory={userPageCategory}
+          userpagecategory={userPageCategory}
           onClick={handleUserTypeButtonClick}
         >
           <IoMdGrid />
         </PostTypeButton>
         <PostTypeButton
           value="marks"
-          userPageCategory={userPageCategory}
+          userpagecategory={userPageCategory}
           onClick={handleUserTypeButtonClick}
         >
           <FaRegBookmark />
         </PostTypeButton>
         <PostTypeButton
           value="tags"
-          userPageCategory={userPageCategory}
+          userpagecategory={userPageCategory}
           onClick={handleUserTypeButtonClick}
         >
           <BiUserPin />
@@ -190,7 +194,7 @@ const UserButtonBox = styled.div`
     font-size: 14px;
     font-weight: 600;
     border-radius: 8px;
-    padding: 9px 16px;
+    padding: 9px 13px;
     border: none;
     background-color: #eee;
     &:hover {
@@ -228,7 +232,7 @@ const PostTypeFlex = styled.div`
 
 interface PostTypeButtonProps {
   value: string;
-  userPageCategory: string;
+  userpagecategory: string;
   onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
@@ -244,11 +248,11 @@ const PostTypeButton = styled.button<PostTypeButtonProps>`
   background-color: transparent;
   box-sizing: border-box;
   border-top: ${(props) =>
-    props.userPageCategory === props.value ? "1px solid #333" : "transparent"};
+    props.userpagecategory === props.value ? "1px solid #333" : "transparent"};
 
   & > svg {
     color: ${(props) =>
-      props.userPageCategory === props.value ? "blue" : "black"};
+      props.userpagecategory === props.value ? "blue" : "black"};
     size: 12px;
   }
 `;

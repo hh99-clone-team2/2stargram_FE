@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import { useEffect } from "react";
 import {
   IoHomeSharp,
   IoHomeOutline,
@@ -7,19 +7,23 @@ import {
   IoPersonCircleOutline,
   IoPersonCircleSharp,
 } from "react-icons/io5";
+import styled from "styled-components";
 import { FaRegSquarePlus, FaSquarePlus } from "react-icons/fa6";
 import { IoMdPaperPlane, IoIosPaperPlane } from "react-icons/io";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { useEffect } from "react";
+import { useIsModalStore } from "../../zustand/createModal/createModalState";
 
 function Navbar() {
   const location = useLocation();
   const params = useParams();
   const navigate = useNavigate();
-  useEffect(() => {
-    console.log(location, params);
-  }, [location]);
-  console.log(location);
+
+  const useSetIsModalClick = useIsModalStore((state) => state.setIsModalClick);
+
+  const handleIsModal = () => {
+    useSetIsModalClick();
+  };
+
   return (
     <NavBarStyle>
       <NavButton onClick={() => navigate("/")}>
@@ -29,7 +33,7 @@ function Navbar() {
         <IoCompassOutline />
         {/* <IoCompass /> */}
       </NavButton>
-      <NavButton>
+      <NavButton onClick={handleIsModal}>
         <FaRegSquarePlus />
         {/* <FaSquarePlus /> */}
       </NavButton>
@@ -43,6 +47,7 @@ function Navbar() {
     </NavBarStyle>
   );
 }
+
 const NavBarStyle = styled.div`
   position: fixed;
   bottom: 0;
@@ -52,7 +57,7 @@ const NavBarStyle = styled.div`
   align-items: center;
   height: 48px;
   width: 100%;
-  z-index: 999;
+  z-index: 9;
   background-color: #fff;
 `;
 
