@@ -5,6 +5,7 @@ import { IoMdGrid } from "react-icons/io";
 import { FaRegBookmark, FaUserCog } from "react-icons/fa";
 import { BiUserPin } from "react-icons/bi";
 import styled from "styled-components";
+import { getPosts, loginSignUp, requestSignUp } from "../api/testApi";
 
 function UsersComponent() {
   const [userPageCategory, setUserPageCategory] = useState("posts");
@@ -27,6 +28,9 @@ function UsersComponent() {
           <li>
             <FaUserCog />
           </li>
+          <button onClick={loginSignUp}>로그인</button>
+          <button onClick={requestSignUp}>회원가입</button>
+          <button onClick={getPosts}>불러오기</button>
         </Header>
       </HeaderContainer>
       <section>
@@ -190,7 +194,7 @@ const UserButtonBox = styled.div`
     font-size: 14px;
     font-weight: 600;
     border-radius: 8px;
-    padding: 9px 16px;
+    padding: 9px 13px;
     border: none;
     background-color: #eee;
     &:hover {
