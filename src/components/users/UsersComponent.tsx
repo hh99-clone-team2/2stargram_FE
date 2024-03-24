@@ -1,20 +1,43 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { BsGearWide, BsChevronLeft } from "react-icons/bs";
 import { IoMdGrid } from "react-icons/io";
 import { FaRegBookmark, FaUserCog } from "react-icons/fa";
 import { BiUserPin } from "react-icons/bi";
 import styled from "styled-components";
+import { loginSignUp, requestSignUp } from "../../api/testApi";
+import { jwtDecode } from "jwt-decode";
+import { getUserPostsList } from "../../api/userPage";
+import { useQuery } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+
+type UserType = React.MouseEvent<HTMLButtonElement>;
 
 function UsersComponent() {
   const [userPageCategory, setUserPageCategory] = useState("posts");
-  const handleUserTypeButtonClick = (
-    userType: React.MouseEvent<HTMLButtonElement>,
-  ) => {
+  const [pageNum, setPageNum] = useState(0);
+
+  const handleUserTypeButtonClick = (userType: UserType) => {
     setUserPageCategory(userType.currentTarget.value);
   };
 
-  const params = useParams();
+  const { userId } = useParams();
+  const accessToken = localStorage.getItem("accessToken");
+  const userIdJWT = useRef("");
+  if (accessToken !== null) {
+    userIdJWT.current = jwtDecode(accessToken.substring(7));
+  }
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["getUserPostsList", userId, pageNum],
+    queryFn: () => getUserPostsList(userId!, pageNum),
+  });
+
+  if (isLoading) {
+  }
+  if (isError) {
+  }
+
   return (
     <>
       <HeaderContainer>
@@ -23,9 +46,14 @@ function UsersComponent() {
             <BsGearWide />
             <BsChevronLeft />
           </li>
-          <li>{params.userId}</li>
+          <li>{userId}</li>
           <li>
             <FaUserCog />
+            <button onClick={loginSignUp}>로그인</button>
+            <button onClick={requestSignUp}>회원가입</button>
+            <button onClick={() => localStorage.removeItem("accessToken")}>
+              로그아웃
+            </button>
           </li>
         </Header>
       </HeaderContainer>
@@ -33,7 +61,7 @@ function UsersComponent() {
         <UserImgContainer>
           <UserImg></UserImg>
           <div>
-            <h3>{params.userId}</h3>
+            <h3>{userId}</h3>
             <UserButtonBox>
               <button>프로필 편집</button>
               <button>보관된 스토리 보기</button>
@@ -91,23 +119,23 @@ function UsersComponent() {
         </PostTypeButton>
       </PostTypeFlex>
       <UserPostsList>
-        <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
-        <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
-        <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
-        <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
-        <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
-        <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
-        <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
-        <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
-        <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
-        <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
-        <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
-        <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
-        <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
-        <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
-        <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
-        <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
-        <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
+        {data
+          ? data.posts.map((item: any) => {
+              return (
+                <>
+                  <ImgContainer
+                    key={item.postId}
+                    imgurl={item.postImageList[0].url}
+                  ></ImgContainer>
+                  <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
+                  <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
+                  <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
+                  <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
+                  <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
+                </>
+              );
+            })
+          : null}
       </UserPostsList>
     </>
   );
@@ -261,7 +289,11 @@ const UserPostsList = styled.div`
 `;
 
 const ImgContainer = styled.div`
-  background-image: url("https://i.namu.wiki/i/ZRcJDJ_BZTJuPENmHR_YvosOMVEWuEtOKLP_2j1PWC519WDMnhA0BVm2j07dJiMUank0w31T3FkYBVJVz_rmKv6ehtEtHqSA2flVMFEbn5HlwLsICrfptNpIP9MVwlUM6ceMZxQlYTV2Ng1AwmlkxQ.webp");
+  background-image: ${(props: any) =>
+    props.imgurl
+      ? `url(${props.imgurl})`
+      : "url(https://i.namu.wiki/i/ZRcJDJ_BZTJuPENmHR_YvosOMVEWuEtOKLP_2j1PWC519WDMnhA0BVm2j07dJiMUank0w31T3FkYBVJVz_rmKv6ehtEtHqSA2flVMFEbn5HlwLsICrfptNpIP9MVwlUM6ceMZxQlYTV2Ng1AwmlkxQ.webp)"};
+
   background-repeat: no-repeat;
   background-size: cover;
   &::after {

@@ -1,10 +1,9 @@
-import { ChangeEvent, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { useIsModalStore } from "../zustand/createModal/CreateModalState";
 import { CiImageOn } from "react-icons/ci";
 import { IoCloseOutline } from "react-icons/io5";
 import { FaAngleRight, FaAngleLeft } from "react-icons/fa";
-
 import { addCreateNewPost } from "../api/userPage";
 
 function CreateModal() {
@@ -15,10 +14,6 @@ function CreateModal() {
   const saveImgFile = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : "";
     setImgFile(file);
-    // const inputElement = e.target as HTMLInputElement;
-    // if (inputElement.files && inputElement.files.length > 0) {
-    //   setImgFile(inputElement.files[0]);
-    // }
   };
 
   const useSetIsModalClick = useIsModalStore((state) => state.setIsModalClick);
@@ -35,14 +30,13 @@ function CreateModal() {
   const handleAddPostButtonClick = () => {
     console.log(imgFile, createContent);
     formData.append("files", imgFile);
-    formData.append(
-      "createPostRequestDto",
-      JSON.stringify({ content: createContent }),
-    );
+
+    const json = JSON.stringify({ content: createContent });
+    const blob = new Blob([json], { type: "application/json" });
+    formData.append("createPostRequestDto", blob);
+
     addCreateNewPost(formData);
-    for (const x of formData) {
-      console.log(x);
-    }
+    useSetIsModalClick();
   };
 
   const handleChangeContent = (content: string) => {
