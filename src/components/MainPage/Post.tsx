@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { FaUserCircle, FaRegBookmark } from "react-icons/fa";
 import { BsThreeDots } from "react-icons/bs";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { IoChatbubbleOutline, IoPaperPlaneOutline } from "react-icons/io5";
-import { postWithFollow, toggleLike } from "../APIS/api";
+import { postWithFollow } from "../APIS/api";
 import HorizonLine from "../Layout/HorizontalLine";
 import CommentModal from "../Layout/CommentModals";
 import styled from "styled-components";
+import { likePost } from "../../axios/api";
 
 export interface PostData {
   postId: number;
@@ -48,7 +49,7 @@ function Post() {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await postWithFollow(token!, 0); // 커서를 0으로 초기화
+        const response = await postWithFollow(token!, 0);
         if (response.data.status) {
           setData(response.data.data);
         }
@@ -91,7 +92,7 @@ function Post() {
     );
 
     try {
-      await toggleLike(postId, "your_auth_token_here");
+      await likePost(postId);
     } catch (error) {
       console.error("Error toggling like: ", error);
     }
@@ -164,7 +165,7 @@ function Post() {
                 <p className="SummaryContent">
                   {showFullContent[item.postId]
                     ? item.contents
-                    : `${item.contents.split(". ")[0]}. ...`}
+                    : `${(item.contents || "").split(". ")[0]}. ...`}
                   <button
                     className="more"
                     onClick={() => toggleContentDisplay(item.postId)}

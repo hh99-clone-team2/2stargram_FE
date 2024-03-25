@@ -2,6 +2,7 @@ import styled from "styled-components";
 import Post from "./Post";
 import Story from "./Story";
 import HorizonLine from "../Layout/HorizontalLine";
+import React from "react";
 
 function Feed() {
   return (
@@ -22,7 +23,7 @@ export default Feed;
 
 const FeedContainer = styled.div`
   background-color: #fff;
-  height: 1000px;
+  height: max-content;
   padding-top: 50px;
 `;
 
