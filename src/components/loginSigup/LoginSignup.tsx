@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
 import logo from "../../assets/logo.png";
 import {
   LoginWrapper,
@@ -15,7 +15,7 @@ import { useMutation } from "@tanstack/react-query";
 import { loginUser, signupUser } from "../../axios/api";
 import { setCookie, setLocalStorage } from "../../utils/cookieUtils";
 import { useNavigate } from "react-router-dom";
-import {ErrorIcon} from "./ErrorIcon "
+import { ErrorIcon } from "./ErrorIcon ";
 
 const LoginSignup = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -36,25 +36,27 @@ const LoginSignup = () => {
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-  
+
     // 유효성 검사
-    if (name === 'loginId') {
-      const loginIdRegex = /^(?:\d{3}-\d{3,4}-\d{4}|[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/;
+    if (name === "loginId") {
+      const loginIdRegex =
+        /^(?:\d{3}-\d{3,4}-\d{4}|[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/;
       if (!loginIdRegex.test(value)) {
         setLoginIdError("유효하지 않은 이메일 또는 휴대폰 번호입니다.");
       } else {
         setLoginIdError("");
       }
-    } else if (name === 'password') {
+    } else if (name === "password") {
       const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[!@#])[\da-zA-Z!@#]{8,}$/;
       if (!passwordRegex.test(value)) {
-        setPasswordError("비밀번호는 숫자, 소문자, 특수문자를 포함하여 8자 이상이어야 합니다.");
+        setPasswordError(
+          "비밀번호는 숫자, 소문자, 특수문자를 포함하여 8자 이상이어야 합니다.",
+        );
       } else {
         setPasswordError("");
       }
     }
   };
-  
 
   const { loginId, password, name, username } = formData;
 
@@ -82,7 +84,7 @@ const LoginSignup = () => {
     },
     onError: (error: any) => {
       console.error("에러: ", error); // 에러를 콘솔에 출력합니다.
-      
+
       // 서버에서 내려준 에러 메시지 확인
       if (error.response.data.message) {
         alert(error.response.data.message);
@@ -95,13 +97,13 @@ const LoginSignup = () => {
         );
       }
     },
-    
   });
 
   const handleFormSubmit = async (e: FormEvent) => {
     e.preventDefault();
-  
-    if (!loginIdError && !passwordError) { // 유효성 검사를 통과하는 경우에만 mutation 호출
+
+    if (!loginIdError && !passwordError) {
+      // 유효성 검사를 통과하는 경우에만 mutation 호출
       mutation.mutate(formData);
     }
   };
@@ -119,7 +121,7 @@ const LoginSignup = () => {
             onChange={handleInputChange}
             required
           />
-          {loginIdError && <ErrorIcon />} 
+          {loginIdError && <ErrorIcon />}
           {!isLogin && (
             <>
               <Input
@@ -148,7 +150,7 @@ const LoginSignup = () => {
             onChange={handleInputChange}
             required
           />
-          {passwordError && <ErrorIcon />} 
+          {passwordError && <ErrorIcon />}
           <Button type="submit">{isLogin ? "로그인" : "가입"}</Button>
           <And>또는</And>
           <Link href="#">비밀번호를 잊으셨나요?</Link>

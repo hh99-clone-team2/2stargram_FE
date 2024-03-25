@@ -1,30 +1,39 @@
 import { useState, useEffect } from "react";
-import styled from "styled-components";
 import { FaUserCircle, FaRegBookmark } from "react-icons/fa";
 import { BsThreeDots } from "react-icons/bs";
-import { FcLike } from "react-icons/fc";
-import { AiFillHeart } from "react-icons/ai";
+import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { IoChatbubbleOutline, IoPaperPlaneOutline } from "react-icons/io5";
+import { postWithFollow, toggleLike } from "../APIS/api";
 import HorizonLine from "../Layout/HorizontalLine";
-import { getMainPage, toggleLike } from "../APIS/api";
-import { AxiosResponse } from "axios";
 import CommentModal from "../Layout/CommentModals";
+import styled from "styled-components";
 
-interface PostData {
+export interface PostData {
   postId: number;
   username: string;
-  createdAt: string;
-  url: string;
-  like: boolean;
-  likes: number;
   contents: string;
+  postImageList: PostImageList[];
+  likes: number;
+  like: boolean;
   commentList: Comment[];
+  createdAt: string;
+  likesCount: number;
 }
 
-interface Comment {
+export interface PostImageList {
   id: number;
+  imageName: string;
+  url: string;
+}
+
+export interface Comment {
+  postId: number;
+  userId: number;
+  commentId: number;
   username: string;
   content: string;
+  createdAt: string;
+  formattedTime: string;
 }
 
 function Post() {
@@ -38,8 +47,11 @@ function Post() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response: AxiosResponse<PostData[]> = await getMainPage();
-        setData(response.data);
+        const token = localStorage.getItem("token");
+        const response = await postWithFollow(token, 0); // 커서를 0으로 초기화
+        if (response.data.status) {
+          setData(response.data.data);
+        }
       } catch (error) {
         console.error("Error fetching data: ", error);
       }
@@ -59,6 +71,25 @@ function Post() {
   const handleLike = async (postId: number) => {
     const isLiked = !likedPosts[postId];
     setLikedPosts({ ...likedPosts, [postId]: isLiked });
+
+    // 좋아요 개수 업데이트 로직 수정
+    setData((data) =>
+      data.map((post) =>
+        post.postId === postId
+          ? {
+              ...post,
+              // 좋아요를 취소하는 경우, likes가 0보다 클 때만 1 감소
+              likes: isLiked
+                ? post.likes + 1
+                : post.likes > 0
+                  ? post.likes - 1
+                  : post.likes,
+              like: isLiked,
+            }
+          : post,
+      ),
+    );
+
     try {
       await toggleLike(postId, "your_auth_token_here");
     } catch (error) {
@@ -76,6 +107,8 @@ function Post() {
   const toggleCommentModal = (postId: number) => {
     setShowCommentModal((prev) => (prev === postId ? null : postId));
   };
+
+  console.log(data);
 
   return (
     <>
@@ -98,17 +131,20 @@ function Post() {
 
             {/* 게시물 이미지 */}
             <ImgContainer>
-              <img src={item.url} alt="Post image" />
+              <img src={item.postImageList[0].url} alt="Post image" />
             </ImgContainer>
 
             {/* 아이콘 컨테이너 */}
             <IconContainer>
               <div className="leftbox">
-                <button onClick={() => handleLike(item.postId)}>
+                <button
+                  className="Like"
+                  onClick={() => handleLike(item.postId)}
+                >
                   {likedPosts[item.postId] ? (
                     <AiFillHeart size="25" color="red" />
                   ) : (
-                    <FcLike size="25" />
+                    <AiOutlineHeart size="25" color="black" />
                   )}
                 </button>
                 <IoChatbubbleOutline
@@ -122,15 +158,18 @@ function Post() {
 
             {/* 게시물 내용 */}
             <Contents>
-              <p className="LikeCount">Likes: {item.likes}</p>
+              <p className="LikeCount">좋아요 {item.likes}개</p>
               <div className="contents">
                 <p className="titleNickName">{item.username}</p>
                 <p className="SummaryContent">
                   {showFullContent[item.postId]
                     ? item.contents
                     : `${item.contents.split(". ")[0]}. ...`}
-                  <button onClick={() => toggleContentDisplay(item.postId)}>
-                    {showFullContent[item.postId] ? "Show less" : "Read more"}
+                  <button
+                    className="more"
+                    onClick={() => toggleContentDisplay(item.postId)}
+                  >
+                    {showFullContent[item.postId] ? "숨기기" : "더보기"}
                   </button>
                 </p>
               </div>
@@ -224,6 +263,11 @@ const IconContainer = styled.div`
   margin-left: 5px;
   margin-right: 5px;
 
+  .Like {
+    border: none;
+    background: none;
+  }
+
   .leftbox {
     display: flex;
     gap: 5px;
@@ -262,5 +306,14 @@ const Contents = styled.div`
     font-size: 14px;
     margin-top: 5px;
     color: grey;
+  }
+
+  .more {
+    border: none;
+    background: none;
+    color: grey;
+    cursor: pointer;
+    padding: 0;
+    font-size: 13px;
   }
 `;
