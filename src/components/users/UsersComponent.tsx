@@ -7,15 +7,15 @@ import { BiUserPin } from "react-icons/bi";
 import styled from "styled-components";
 import { loginSignUp, requestSignUp } from "../../api/testApi";
 import { jwtDecode } from "jwt-decode";
-import { getUserPostsList } from "../../api/userPage";
-import { useQuery } from "@tanstack/react-query";
-import { AxiosError } from "axios";
+import { followUser, getUserPostsList } from "../../api/userPage";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
 type UserType = React.MouseEvent<HTMLButtonElement>;
 
 function UsersComponent() {
   const [userPageCategory, setUserPageCategory] = useState("posts");
   const [pageNum, setPageNum] = useState(0);
+  const [isLoggedInUser, setIsLoggedInUser] = useState("");
 
   const handleUserTypeButtonClick = (userType: UserType) => {
     setUserPageCategory(userType.currentTarget.value);
@@ -25,18 +25,19 @@ function UsersComponent() {
   const accessToken = localStorage.getItem("accessToken");
   const userIdJWT = useRef("");
   if (accessToken !== null) {
-    userIdJWT.current = jwtDecode(accessToken.substring(7));
+    userIdJWT.current = jwtDecode(accessToken.substring(7)).sub;
   }
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["getUserPostsList", userId, pageNum],
     queryFn: () => getUserPostsList(userId!, pageNum),
   });
+  console.log(userIdJWT.current);
+  console.log(data);
 
-  if (isLoading) {
-  }
-  if (isError) {
-  }
+  // useInfiniteQuery(["getUserPostsList"], ({ pageParam = defaultUrl }) =>
+  //   getUserPostsList(userId!, pageNum),
+  // );
 
   return (
     <>
@@ -49,11 +50,11 @@ function UsersComponent() {
           <li>{userId}</li>
           <li>
             <FaUserCog />
-            <button onClick={loginSignUp}>로그인</button>
+            {/* <button onClick={loginSignUp}>로그인</button>
             <button onClick={requestSignUp}>회원가입</button>
             <button onClick={() => localStorage.removeItem("accessToken")}>
               로그아웃
-            </button>
+            </button> */}
           </li>
         </Header>
       </HeaderContainer>
@@ -63,8 +64,14 @@ function UsersComponent() {
           <div>
             <h3>{userId}</h3>
             <UserButtonBox>
-              <button>프로필 편집</button>
-              <button>보관된 스토리 보기</button>
+              {userId === userIdJWT.current ? (
+                <>
+                  <button>프로필 편집</button>
+                  <button>보관된 스토리 보기</button>
+                </>
+              ) : (
+                <button onClick={() => followUser(userId!)}>팔로우</button>
+              )}
             </UserButtonBox>
           </div>
         </UserImgContainer>
@@ -127,11 +134,30 @@ function UsersComponent() {
                     key={item.postId}
                     imgurl={item.postImageList[0].url}
                   ></ImgContainer>
-                  <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
-                  <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
-                  <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
-                  <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
-                  <ImgContainer>{/* <img src="" alt="" /> */}</ImgContainer>
+                  <ImgContainer key={item.postId}>
+                    {/* <img src="" alt="" /> */}
+                  </ImgContainer>
+                  <ImgContainer key={item.postId}>
+                    {/* <img src="" alt="" /> */}
+                  </ImgContainer>
+                  <ImgContainer key={item.postId}>
+                    {/* <img src="" alt="" /> */}
+                  </ImgContainer>
+                  <ImgContainer key={item.postId}>
+                    {/* <img src="" alt="" /> */}
+                  </ImgContainer>
+                  <ImgContainer key={item.postId}>
+                    {/* <img src="" alt="" /> */}
+                  </ImgContainer>
+                  <ImgContainer key={item.postId}>
+                    {/* <img src="" alt="" /> */}
+                  </ImgContainer>
+                  <ImgContainer key={item.postId}>
+                    {/* <img src="" alt="" /> */}
+                  </ImgContainer>
+                  <ImgContainer key={item.postId}>
+                    {/* <img src="" alt="" /> */}
+                  </ImgContainer>
                 </>
               );
             })

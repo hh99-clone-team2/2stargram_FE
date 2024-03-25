@@ -31,7 +31,7 @@ function CreateModal() {
     console.log(imgFile, createContent);
     formData.append("files", imgFile);
 
-    const json = JSON.stringify({ content: createContent });
+    const json = JSON.stringify({ contents: createContent });
     const blob = new Blob([json], { type: "application/json" });
     formData.append("createPostRequestDto", blob);
 

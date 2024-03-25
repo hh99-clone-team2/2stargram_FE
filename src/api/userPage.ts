@@ -14,10 +14,20 @@ export const addCreateNewPost = async (postData: any) => {
 
 export const getUserPostsList = async (userId: string, cursor: number) => {
   try {
-    const res = await authInstance.get(`/p/${userId}?cursor=1`, {
+    const res = await authInstance.get(`/p/${userId}?cursor=0`, {
       params: { cursor: cursor },
     });
     return res.data.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const followUser = async (userId: string) => {
+  try {
+    const res = await authInstance.post(`/friendships/create/${userId}`);
+    console.log(res);
+    return res.data;
   } catch (error) {
     throw error;
   }
