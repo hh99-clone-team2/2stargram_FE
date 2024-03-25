@@ -5,10 +5,10 @@ import { IoMdGrid } from "react-icons/io";
 import { FaRegBookmark, FaUserCog } from "react-icons/fa";
 import { BiUserPin } from "react-icons/bi";
 import styled from "styled-components";
-import { loginSignUp, requestSignUp } from "../../api/testApi";
 import { jwtDecode } from "jwt-decode";
 import { followUser, getUserPostsList } from "../../api/userPage";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { loginSignUp, requestSignUp } from "../../api/testApi";
 
 type UserType = React.MouseEvent<HTMLButtonElement>;
 
@@ -38,7 +38,6 @@ function UsersComponent() {
   // useInfiniteQuery(["getUserPostsList"], ({ pageParam = defaultUrl }) =>
   //   getUserPostsList(userId!, pageNum),
   // );
-
   return (
     <>
       <HeaderContainer>
@@ -50,11 +49,11 @@ function UsersComponent() {
           <li>{userId}</li>
           <li>
             <FaUserCog />
-            {/* <button onClick={loginSignUp}>로그인</button>
+            <button onClick={loginSignUp}>로그인</button>
             <button onClick={requestSignUp}>회원가입</button>
             <button onClick={() => localStorage.removeItem("accessToken")}>
               로그아웃
-            </button> */}
+            </button>
           </li>
         </Header>
       </HeaderContainer>
@@ -129,36 +128,9 @@ function UsersComponent() {
         {data
           ? data.posts.map((item: any) => {
               return (
-                <>
-                  <ImgContainer
-                    key={item.postId}
-                    imgurl={item.postImageList[0].url}
-                  ></ImgContainer>
-                  <ImgContainer key={item.postId}>
-                    {/* <img src="" alt="" /> */}
-                  </ImgContainer>
-                  <ImgContainer key={item.postId}>
-                    {/* <img src="" alt="" /> */}
-                  </ImgContainer>
-                  <ImgContainer key={item.postId}>
-                    {/* <img src="" alt="" /> */}
-                  </ImgContainer>
-                  <ImgContainer key={item.postId}>
-                    {/* <img src="" alt="" /> */}
-                  </ImgContainer>
-                  <ImgContainer key={item.postId}>
-                    {/* <img src="" alt="" /> */}
-                  </ImgContainer>
-                  <ImgContainer key={item.postId}>
-                    {/* <img src="" alt="" /> */}
-                  </ImgContainer>
-                  <ImgContainer key={item.postId}>
-                    {/* <img src="" alt="" /> */}
-                  </ImgContainer>
-                  <ImgContainer key={item.postId}>
-                    {/* <img src="" alt="" /> */}
-                  </ImgContainer>
-                </>
+                <ImgContainer key={item.postId}>
+                  <img src={item.postImageList[0].url} alt="" />
+                </ImgContainer>
               );
             })
           : null}
@@ -174,6 +146,7 @@ const HeaderContainer = styled.header`
   height: 44px;
   background-color: #fff;
   border-bottom: 1px solid #ccc;
+  z-index: 99;
 `;
 
 const Header = styled.ul`
@@ -315,17 +288,17 @@ const UserPostsList = styled.div`
 `;
 
 const ImgContainer = styled.div`
-  background-image: ${(props: any) =>
-    props.imgurl
-      ? `url(${props.imgurl})`
-      : "url(https://i.namu.wiki/i/ZRcJDJ_BZTJuPENmHR_YvosOMVEWuEtOKLP_2j1PWC519WDMnhA0BVm2j07dJiMUank0w31T3FkYBVJVz_rmKv6ehtEtHqSA2flVMFEbn5HlwLsICrfptNpIP9MVwlUM6ceMZxQlYTV2Ng1AwmlkxQ.webp)"};
-
-  background-repeat: no-repeat;
-  background-size: cover;
-  &::after {
-    content: "";
-    display: block;
-    padding-bottom: 100%;
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%;
+  margin-bottom: 20px;
+  overflow: hidden;
+  img {
+    width: 100%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 `;
 
