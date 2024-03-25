@@ -30,7 +30,34 @@ const CommentModal: React.FC<CommentModalProps> = ({ postId, onClose }) => {
   const [newComment, setNewComment] = useState("");
 
   useEffect(() => {
-    // 댓글 데이터 가져오기 로직은 여기에 구현...
+    const fetchComments = async () => {
+      try {
+        const response = await axios.get(`/api/comments/${postId}`, {
+          headers: {
+            // 토큰은 실제 사용 환경에 맞게 구성해야 합니다.
+            Authorization:
+              "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzXyIsImF1dGgiOiJVU0VSIiwiZXhwIjoxNzE0ODg3NDU0LCJpYXQiOjE3MTEyODc0NTR9.m7vV-uAoAFMF8esjhMyOBxJDK0nL3kngpYGVynKevqE",
+          },
+        });
+
+        if (response.status === 200 && response.data.status) {
+          const fetchedComments = response.data.data.map(
+            (commentData: CommentData) => ({
+              id: commentData.commentId,
+              username: commentData.username,
+              content: commentData.content,
+              createdAt: commentData.createdAt,
+              formattedTime: commentData.formattedTime,
+            }),
+          );
+          setComments(fetchedComments);
+        }
+      } catch (error) {
+        console.error("댓글 불러오기 중 오류 발생", error);
+      }
+    };
+
+    fetchComments();
   }, [postId]);
 
   const handleAddComment = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -44,7 +71,8 @@ const CommentModal: React.FC<CommentModalProps> = ({ postId, onClose }) => {
         {
           headers: {
             // 토큰은 실제 사용 환경에 맞게 구성해야 합니다.
-            Authorization: `Bearer your_token_here`,
+            Authorization:
+              "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzXyIsImF1dGgiOiJVU0VSIiwiZXhwIjoxNzE0ODg3NDU0LCJpYXQiOjE3MTEyODc0NTR9.m7vV-uAoAFMF8esjhMyOBxJDK0nL3kngpYGVynKevqE",
           },
         },
       );
@@ -69,6 +97,28 @@ const CommentModal: React.FC<CommentModalProps> = ({ postId, onClose }) => {
     }
   };
 
+  const handleDeleteComment = async (commentId: number) => {
+    try {
+      const response = await axios.delete(
+        `/api/comments/${postId}/delete/${commentId}`,
+        {
+          headers: {
+            Authorization:
+              "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0MTIzXyIsImF1dGgiOiJVU0VSIiwiZXhwIjoxNzE0ODg3NDU0LCJpYXQiOjE3MTEyODc0NTR9.m7vV-uAoAFMF8esjhMyOBxJDK0nL3kngpYGVynKevqE",
+          },
+        },
+      );
+
+      if (response.status === 200 && response.data.status) {
+        setComments((prevComments) =>
+          prevComments.filter((comment) => comment.id !== commentId),
+        );
+      }
+    } catch (error) {
+      console.error("댓글 삭제 중 오류 발생", error);
+    }
+  };
+
   return (
     <ModalBackground onClick={onClose}>
       <ModalContent onClick={(e) => e.stopPropagation()}>
@@ -78,7 +128,16 @@ const CommentModal: React.FC<CommentModalProps> = ({ postId, onClose }) => {
           <CommentItem key={comment.id}>
             <span>{comment.username}: </span>
             <span>{comment.content}</span>
-            {/* 여기에 댓글 삭제 로직을 구현할 수 있습니다. */}
+            {comments.map((comment) => (
+              <CommentItem key={comment.id}>
+                <span>{comment.username}: </span>
+                <span>{comment.content}</span>
+                <button onClick={() => handleDeleteComment(comment.id)}>
+                  삭제
+                </button>{" "}
+                {/* 삭제 버튼 추가 */}
+              </CommentItem>
+            ))}
           </CommentItem>
         ))}
         <form onSubmit={handleAddComment}>

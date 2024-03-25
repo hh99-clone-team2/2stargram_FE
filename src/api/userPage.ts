@@ -23,10 +23,18 @@ export const getUserPostsList = async (userId: string, cursor: number) => {
   }
 };
 
-export const followUser = async (userId: string) => {
+export const followUser = async (userName: string) => {
   try {
-    const res = await authInstance.post(`/friendships/create/${userId}`);
-    console.log(res);
+    const res = await authInstance.post(`/friendships/create/${userName}`);
+    return res.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getUserInfo = async (userName: string) => {
+  try {
+    const res = await authInstance.post(`/api/user/${userName}`);
     return res.data;
   } catch (error) {
     throw error;

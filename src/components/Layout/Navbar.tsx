@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import {
   IoHomeSharp,
   IoHomeOutline,
@@ -12,11 +12,18 @@ import { FaRegSquarePlus, FaSquarePlus } from "react-icons/fa6";
 import { IoMdPaperPlane, IoIosPaperPlane } from "react-icons/io";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useIsModalStore } from "../../zustand/createModal/CreateModalState";
+import { jwtDecode } from "jwt-decode";
 
 function Navbar() {
   const location = useLocation();
   const params = useParams();
   const navigate = useNavigate();
+  const accessToken = localStorage.getItem("accessToken");
+
+  let userIdJWT = useRef<any>();
+  if (accessToken !== null) {
+    userIdJWT = useRef(jwtDecode(accessToken.substring(7)).sub);
+  }
 
   const useSetIsModalClick = useIsModalStore((state) => state.setIsModalClick);
 
@@ -41,7 +48,7 @@ function Navbar() {
         <IoMdPaperPlane />
         {/* <IoIosPaperPlane /> */}
       </NavButton>
-      <NavButton onClick={() => navigate("/hoheesu")}>
+      <NavButton onClick={() => navigate(`/user/${userIdJWT.current}`)}>
         {params.userId ? <IoPersonCircleSharp /> : <IoPersonCircleOutline />}
       </NavButton>
     </NavBarStyle>
