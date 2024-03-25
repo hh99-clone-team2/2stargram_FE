@@ -11,14 +11,14 @@ const LoginWrapper = styled.div`
 `;
 
 const LoginFormContainer = styled.div<{ show: boolean }>`
-  display: ${(props) => (props.show ? "flex" : "none")};
+  display:  "flex";
   flex-direction: column;
   align-items: center;
   gap: 10px;
 `;
 
 const SignupFormContainer = styled.div<{ show: boolean }>`
-  display: ${(props) => (props.show ? "flex" : "none")};
+  display: "flex" ;
   flex-direction: column;
   align-items: center;
   gap: 10px;
@@ -51,11 +51,12 @@ const Input = styled.input`
   border: 1px solid #dbdbdb;
   border-radius: 3px;
   width: 100%;
+  position: relative;
 `;
 
 const Button = styled.button`
-  padding: 10px;
-  background: #43b4ff;
+   padding: 10px;
+  background: ${props => props.isValid ? '#ff0000' : '#43b4ff'};
   color: white;
   border: none;
   border-radius: 10px;

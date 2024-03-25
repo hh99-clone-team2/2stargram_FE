@@ -3,7 +3,6 @@ import logo from "../../assets/logo.png";
 import {
   LoginWrapper,
   LoginFormContainer,
-  SignupFormContainer,
   LoginForm,
   LinkForm,
   Input,
@@ -16,100 +15,94 @@ import { useMutation } from "@tanstack/react-query";
 import { loginUser, signupUser } from "../../axios/api";
 import { setCookie, setLocalStorage } from "../../utils/cookieUtils";
 import { useNavigate } from "react-router-dom";
+import {ErrorIcon} from "./ErrorIcon "
 
 const LoginSignup = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [loginId, setLoginId] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [username, setUsername] = useState("");
+  const [formData, setFormData] = useState({
+    loginId: "",
+    password: "",
+    name: "",
+    username: "",
+  });
+  const [loginIdError, setLoginIdError] = useState(""); // 이메일 또는 휴대폰 번호 유효성 검사 에러 상태 추가
+  const [passwordError, setPasswordError] = useState(""); // 비밀번호 유효성 검사 에러 상태 추가
 
   const navigate = useNavigate();
   const handleToggle = () => {
     setIsLogin(!isLogin);
   };
 
-  const handleusernameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const username = e.target.value;
-    setUsername(username);
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  
+    // 유효성 검사
+    if (name === 'loginId') {
+      const loginIdRegex = /^(?:\d{3}-\d{3,4}-\d{4}|[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/;
+      if (!loginIdRegex.test(value)) {
+        setLoginIdError("유효하지 않은 이메일 또는 휴대폰 번호입니다.");
+      } else {
+        setLoginIdError("");
+      }
+    } else if (name === 'password') {
+      const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[!@#])[\da-zA-Z!@#]{8,}$/;
+      if (!passwordRegex.test(value)) {
+        setPasswordError("비밀번호는 숫자, 소문자, 특수문자를 포함하여 8자 이상이어야 합니다.");
+      } else {
+        setPasswordError("");
+      }
+    }
   };
-  const handleLoginIdChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const loginId = e.target.value;
-    setLoginId(loginId);
-  };
+  
 
-  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const password = e.target.value;
-    setPassword(password);
-  };
+  const { loginId, password, name, username } = formData;
 
-  const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const name = e.target.value;
-    setName(name);
-  };
-
-  const newUserInfo = {
-    loginId,
-    password,
-    name,
-    username,
-  };
-
-  const userInfo = {
-    loginId,
-    password,
-  };
-
-  // 회원가입 통신
-  const signupMutation = useMutation({
-    mutationFn: signupUser,
+  const mutation = useMutation({
+    mutationFn: isLogin ? loginUser : signupUser,
     onSuccess: (data: any) => {
-      console.log(data);
-      if (data.status === 201) {
-        alert("회원가입에 성공했습니다.");
-        setIsLogin(true);
+      if (isLogin) {
+        const refreshToken = data.data.refreshToken;
+        const accessToken = data.headers.authorization;
+        if (data.status === 200) {
+          setLocalStorage(accessToken);
+          setCookie("refreshToken", refreshToken);
+          localStorage.setItem("username", data.data.username);
+          alert(
+            `${data.data.username}님 로그인 성공하였습니다. 메인페이지로 이동합니다!`,
+          );
+          navigate("/main");
+        }
+      } else {
+        if (data.status === 201) {
+          alert("회원가입에 성공했습니다.");
+          setIsLogin(true);
+        }
       }
     },
     onError: (error: any) => {
-      console.error("회원가입 실패 : ", error.response);
-
-      alert("회원가입에 실패했습니다. 다시 시도해주세요.");
-    },
-  });
-  // 로그인 통신  
-  const loginMutation = useMutation({
-    mutationFn: loginUser,
-    onSuccess: (data: any) => {
-      const refreshToken = data.data.refreshToken;
-      const accessToken = data.headers.authorization;
-      if (data.status === 200) {
-        console.log("로그인 응답 데이터:", data.data);
-        setLocalStorage(accessToken);
-        setCookie("refreshToken", refreshToken);
-        localStorage.setItem("username", data.data.username);
-        // setLocalStorage(data.data.username);
+      console.error("에러: ", error); // 에러를 콘솔에 출력합니다.
+      
+      // 서버에서 내려준 에러 메시지 확인
+      if (error.response.data.message) {
+        alert(error.response.data.message);
+      } else {
+        // 에러 메시지가 없는 경우 기본 메시지 표시
         alert(
-          `${data.data.username}님 로그인 성공하였습니다. 메인페이지로 이동합니다!`,
-        );1
-        navigate("/main");
+          isLogin
+            ? "로그인에 실패하였습니다!"
+            : "회원가입에 실패했습니다. 다시 시도해주세요.",
+        );
       }
     },
-    onError: (error) => {
-      console.log("로그인 실패 : ", error); 
-      alert("로그인에 실패하였습니다!");
-    },
+    
   });
 
-  const handleFormSubmit = async (e: any) => {
+  const handleFormSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
-    if (isLogin) {
-      // 로그인 처리
-      loginMutation.mutate(userInfo);
-    } else {
-      // 회원가입 처리
-      signupMutation.mutate(newUserInfo);
-      console.log("띄울게여 ", newUserInfo);
+  
+    if (!loginIdError && !passwordError) { // 유효성 검사를 통과하는 경우에만 mutation 호출
+      mutation.mutate(formData);
     }
   };
 
@@ -123,23 +116,47 @@ const LoginSignup = () => {
             name="loginId"
             placeholder="이메일 또는 휴대폰 번호"
             value={loginId}
-            onChange={handleLoginIdChange}
+            onChange={handleInputChange}
             required
           />
+          {loginIdError && <ErrorIcon />} 
+          {!isLogin && (
+            <>
+              <Input
+                type="text"
+                name="name"
+                placeholder="성명"
+                value={name}
+                onChange={handleInputChange}
+                required
+              />
+              <Input
+                type="text"
+                name="username"
+                placeholder="사용자 이름"
+                value={username}
+                onChange={handleInputChange}
+                required
+              />
+            </>
+          )}
           <Input
             type="password"
             name="password"
             placeholder="비밀번호"
             value={password}
-            onChange={handlePasswordChange}
+            onChange={handleInputChange}
             required
           />
-          <Button type="submit">로그인</Button>
+          {passwordError && <ErrorIcon />} 
+          <Button type="submit">{isLogin ? "로그인" : "가입"}</Button>
           <And>또는</And>
           <Link href="#">비밀번호를 잊으셨나요?</Link>
         </LoginForm>
         <LinkForm>
-          <div>계정이 없으신가요?</div>
+          <div>
+            {isLogin ? "계정이 없으신가요?" : "이미 계정이 있으신가요?"}
+          </div>
           <div>
             <Link href="#" onClick={handleToggle}>
               {isLogin ? "가입하기" : "로그인하기"}
@@ -147,55 +164,6 @@ const LoginSignup = () => {
           </div>
         </LinkForm>
       </LoginFormContainer>
-
-      <SignupFormContainer show={!isLogin}>
-        <LoginForm onSubmit={handleFormSubmit}>
-          <Img src={logo} alt="로고 이미지" />
-          <div>친구들의 사진과 동영상을 보려면 가입하세요</div>
-
-          <Input
-            type="text"
-            name="loginId"
-            placeholder="이메일 또는 휴대폰 번호"
-            value={loginId}
-            onChange={handleLoginIdChange}
-            required
-          />
-          <Input
-            type="text"
-            name="username"
-            placeholder="성명"
-            value={username}
-            onChange={handleusernameChange}
-            required
-          />
-          <Input
-            type="text"
-            name="name"
-            placeholder="사용자 이름"
-            value={name}
-            onChange={handleNameChange}
-            required
-          />
-          <Input
-            type="password"
-            name="password"
-            placeholder="비밀번호"
-            value={password}
-            onChange={handlePasswordChange}
-            required
-          />
-          <Button type="submit">가입</Button>
-        </LoginForm>
-        <LinkForm>
-          <div>이미 계정이 있으신가요?</div>
-          <div>
-            <Link href="#" onClick={handleToggle}>
-              로그인하기
-            </Link>
-          </div>
-        </LinkForm>
-      </SignupFormContainer>
     </LoginWrapper>
   );
 };
