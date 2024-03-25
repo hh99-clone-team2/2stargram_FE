@@ -11,14 +11,14 @@ const LoginWrapper = styled.div`
 `;
 
 const LoginFormContainer = styled.div<{ show: boolean }>`
-  display:  "flex";
+  display: "flex";
   flex-direction: column;
   align-items: center;
   gap: 10px;
 `;
 
 const SignupFormContainer = styled.div<{ show: boolean }>`
-  display: "flex" ;
+  display: "flex";
   flex-direction: column;
   align-items: center;
   gap: 10px;
@@ -52,11 +52,12 @@ const Input = styled.input`
   border-radius: 3px;
   width: 100%;
   position: relative;
+  color: black;
 `;
 
 const Button = styled.button`
-   padding: 10px;
-  background: ${props => props.isValid ? '#ff0000' : '#43b4ff'};
+  padding: 10px;
+  background: ${(props) => (props.isValid ? "#ff0000" : "#43b4ff")};
   color: white;
   border: none;
   border-radius: 10px;
@@ -79,15 +80,14 @@ const Link = styled.a`
 `;
 
 export {
-    LoginWrapper,
-    LoginFormContainer,
-    SignupFormContainer,
-    LoginForm,
-    LinkForm,
-    Input,
-    Button,
-    Link,
-    Img,
-    And,
-    
-}
+  LoginWrapper,
+  LoginFormContainer,
+  SignupFormContainer,
+  LoginForm,
+  LinkForm,
+  Input,
+  Button,
+  Link,
+  Img,
+  And,
+};
